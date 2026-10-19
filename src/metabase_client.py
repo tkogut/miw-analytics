@@ -417,6 +417,39 @@ class MetabaseClient:
         data["web_url"] = f"{self.base_url}/dashboard/{data.get('id')}"
         return data
 
+    def set_dashboard_cards(
+        self,
+        dashboard_id: int,
+        cards_layout: List[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """
+        Ustawia kompletny układ kart na dashboardzie (PUT /api/dashboard/:id/cards).
+        Każdy element cards_layout zawiera: card_id, row, col, size_x, size_y.
+        """
+        if not self.session_id and not self.api_key:
+            self.authenticate()
+
+        formatted_cards = []
+        for idx, c in enumerate(cards_layout):
+            entry = {
+                "id": c.get("id", -1 - idx),
+                "card_id": c["card_id"],
+                "row": c.get("row", 0),
+                "col": c.get("col", 0),
+                "size_x": c.get("size_x", 12),
+                "size_y": c.get("size_y", 8),
+                "parameter_mappings": c.get("parameter_mappings", []),
+                "visualization_settings": c.get("visualization_settings", {}),
+            }
+            formatted_cards.append(entry)
+
+        headers = self._get_base_headers()
+        url = f"{self.base_url}/api/dashboard/{dashboard_id}/cards"
+        resp = requests.put(url, headers=headers, json={"cards": formatted_cards}, timeout=20)
+        if resp.status_code not in (200, 201, 202):
+            raise RuntimeError(f"Błąd aktualizacji kart na pulpicie (status {resp.status_code}): {resp.text[:300]}")
+        return resp.json()
+
     def add_card_to_dashboard(
         self,
         dashboard_id: int,
@@ -426,23 +459,34 @@ class MetabaseClient:
         size_x: int = 18,
         size_y: int = 10,
     ) -> Dict[str, Any]:
-        """Dodaje kartę do dashboardu (POST /api/dashboard/:id/cards)."""
+        """Dodaje kartę do dashboardu (pobiera istniejące i dodaje nową przez set_dashboard_cards)."""
         if not self.session_id and not self.api_key:
             self.authenticate()
 
-        payload = {
-            "cardId": card_id,
+        headers = self._get_base_headers()
+        r = requests.get(f"{self.base_url}/api/dashboard/{dashboard_id}", headers=headers, timeout=10)
+        existing = []
+        if r.status_code == 200:
+            dash = r.json()
+            for dc in dash.get("dashcards", []):
+                existing.append({
+                    "id": dc.get("id"),
+                    "card_id": dc.get("card_id"),
+                    "row": dc.get("row", 0),
+                    "col": dc.get("col", 0),
+                    "size_x": dc.get("size_x", 12),
+                    "size_y": dc.get("size_y", 8),
+                    "visualization_settings": dc.get("visualization_settings", {}),
+                })
+        existing.append({
+            "id": -1,
+            "card_id": card_id,
             "row": row,
             "col": col,
             "size_x": size_x,
             "size_y": size_y,
-        }
-        headers = self._get_base_headers()
-        url = f"{self.base_url}/api/dashboard/{dashboard_id}/cards"
-        resp = requests.post(url, headers=headers, json=payload, timeout=20)
-        if resp.status_code not in (200, 201, 202):
-            raise RuntimeError(f"Błąd dodawania karty do pulpitu (status {resp.status_code}): {resp.text[:300]}")
-        return resp.json()
+        })
+        return self.set_dashboard_cards(dashboard_id, existing)
 
     def test_connection(self) -> Dict[str, Any]:
         """
