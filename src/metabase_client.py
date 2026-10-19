@@ -324,6 +324,126 @@ class MetabaseClient:
             "raw": data,
         }
 
+    def get_personal_collection_id(self) -> Optional[int]:
+        """Zwraca identyfikator kolekcji osobistej aktualnego użytkownika."""
+        if not self.user_info:
+            self.authenticate()
+        return self.user_info.get("personal_collection_id") if self.user_info else None
+
+    def create_card(
+        self,
+        name: str,
+        sql_query: str,
+        collection_id: Optional[int] = None,
+        display: str = "table",
+        description: Optional[str] = None,
+        visualization_settings: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Publikuje kwerendę SQL jako pytanie/kartę (Card) w Metabase (POST /api/card).
+        Operacja dotyczy wyłącznie wewnętrznej bazy aplikacji Metabase (Zero zmian w Odoo).
+        """
+        self.validate_read_only(sql_query)
+        if not self.session_id and not self.api_key:
+            self.authenticate()
+
+        target_collection_id = collection_id
+        if target_collection_id is None:
+            target_collection_id = self.get_personal_collection_id()
+
+        payload = {
+            "name": name,
+            "description": description or "",
+            "collection_id": target_collection_id,
+            "display": display,
+            "database_id": self.database_id,
+            "dataset_query": {
+                "database": self.database_id,
+                "type": "native",
+                "native": {
+                    "query": sql_query.strip(),
+                },
+            },
+            "visualization_settings": visualization_settings or {},
+        }
+
+        headers = self._get_base_headers()
+        url = f"{self.base_url}/api/card"
+
+        resp = requests.post(url, headers=headers, json=payload, timeout=20)
+        if resp.status_code == 401 and not self.api_key:
+            logger.info("Otrzymano 401 podczas tworzenia karty — odnawianie sesji...")
+            self.authenticate(force_refresh=True)
+            headers = self._get_base_headers()
+            resp = requests.post(url, headers=headers, json=payload, timeout=20)
+
+        if resp.status_code not in (200, 201, 202):
+            raise RuntimeError(
+                f"Błąd tworzenia karty w Metabase (status {resp.status_code}): {resp.text[:300]}"
+            )
+
+        card_data = resp.json()
+        card_id = card_data.get("id")
+        card_url = f"{self.base_url}/question/{card_id}"
+        card_data["web_url"] = card_url
+        logger.info(
+            "Utworzono kartę '%s' (ID %s) w kolekcji %s: %s",
+            name, card_id, target_collection_id, card_url
+        )
+        return card_data
+
+    def create_dashboard(
+        self,
+        name: str,
+        description: Optional[str] = None,
+        collection_id: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """Tworzy pulpit w Metabase (POST /api/dashboard)."""
+        if not self.session_id and not self.api_key:
+            self.authenticate()
+
+        target_collection_id = collection_id or self.get_personal_collection_id()
+        payload = {
+            "name": name,
+            "description": description or "",
+            "collection_id": target_collection_id,
+        }
+        headers = self._get_base_headers()
+        url = f"{self.base_url}/api/dashboard"
+        resp = requests.post(url, headers=headers, json=payload, timeout=20)
+        if resp.status_code not in (200, 201, 202):
+            raise RuntimeError(f"Błąd tworzenia pulpitu (status {resp.status_code}): {resp.text[:300]}")
+        data = resp.json()
+        data["web_url"] = f"{self.base_url}/dashboard/{data.get('id')}"
+        return data
+
+    def add_card_to_dashboard(
+        self,
+        dashboard_id: int,
+        card_id: int,
+        row: int = 0,
+        col: int = 0,
+        size_x: int = 18,
+        size_y: int = 10,
+    ) -> Dict[str, Any]:
+        """Dodaje kartę do dashboardu (POST /api/dashboard/:id/cards)."""
+        if not self.session_id and not self.api_key:
+            self.authenticate()
+
+        payload = {
+            "cardId": card_id,
+            "row": row,
+            "col": col,
+            "size_x": size_x,
+            "size_y": size_y,
+        }
+        headers = self._get_base_headers()
+        url = f"{self.base_url}/api/dashboard/{dashboard_id}/cards"
+        resp = requests.post(url, headers=headers, json=payload, timeout=20)
+        if resp.status_code not in (200, 201, 202):
+            raise RuntimeError(f"Błąd dodawania karty do pulpitu (status {resp.status_code}): {resp.text[:300]}")
+        return resp.json()
+
     def test_connection(self) -> Dict[str, Any]:
         """
         Weryfikuje połączenie z Metabase i bazą danych Odoo.
@@ -346,3 +466,4 @@ if __name__ == "__main__":
     info = client.test_connection()
     print("\n--- METABASE CONNECTION TEST SUCCESS ---")
     print(json.dumps(info, indent=2))
+
