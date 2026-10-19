@@ -1,0 +1,73 @@
+{
+  "$schema": "https://agents-os.dev/schemas/agentic-config/v1",
+  "version": "6.5-swarm",
+  "project": {
+    "name": "miw-analytics",
+    "type": "generic",
+    "primary_language": "auto"
+  },
+  "pipeline": {
+    "gates": {
+      "lint": { "command": "echo 'No lint command configured' || true", "required": false },
+      "typecheck": { "command": "echo 'No typecheck command configured' || true", "required": false },
+      "test": { "command": "echo 'No test command configured' || true", "required": false },
+      "build": { "command": "echo 'No build command configured' || true", "required": false }
+    },
+    "commit_policy": "atomic",
+    "pr_auto_merge": false,
+    "qa_required": true,
+    "qa_label": "needs-qa"
+  },
+  "swarm": {
+    "roles": {
+      "coordinator": { "model": "gemini-3.8-flash-medium", "permissions": ["plan", "route", "review"] },
+      "builder": { "model": "gemini-3.1-pro", "permissions": ["implement", "commit", "test"] },
+      "auditor": { "model": "gemini-3.8-flash-medium", "permissions": ["lint", "audit", "block"] }
+    },
+    "handshake_dir": ".agents/swarm",
+    "heartbeat_interval_s": 300,
+    "max_ram_per_instance_gb": 10
+  },
+  "context": {
+    "router_file": ".agents/agents.md",
+    "domain_modules": [
+      ".agents/agents-pipeline.md",
+      ".agents/agents-qa.md",
+      ".agents/agents-ux.md"
+    ],
+    "max_context_files": 3
+  },
+  "evaluator": {
+    "enabled": false,
+    "test_cases_dir": ".agents/eval/cases",
+    "downscale_target": "gemini-flash",
+    "validation_interval": "weekly"
+  },
+  "baseBranch": "auto",
+  "tracker": "github",
+  "browser": { "provider": "agent-browser" },
+  "validation": {
+    "commands": [
+      "echo 'Configure validation commands in .ai/agentic.config.json'"
+    ]
+  },
+  "labels": {
+    "enabled": true,
+    "pipeline": ["review", "changes-requested", "qa", "qa-failed", "merge-queue", "blocked", "do-not-merge"],
+    "category": ["bug", "feature", "refactor", "security", "dependencies", "documentation"],
+    "meta": ["needs-qa", "skip-qa", "qa-approved", "qa-self-verified", "in-progress", "ci-monitoring"],
+    "priority": ["priority-low", "priority-medium", "priority-high", "priority-extreme"],
+    "risk": ["risk-low", "risk-medium", "risk-high"]
+  },
+  "qaGate": true,
+  "ci": { "maxWaitMinutes": 40 },
+  "engine": { "loopStepThreshold": 20, "executorTier": "standard", "stepReview": "final" },
+  "paths": {
+    "runs": ".ai/runs",
+    "analysis": ".ai/analysis",
+    "specs": ".ai/specs",
+    "scripts": ".ai/scripts",
+    "qa": ".ai/qa"
+  },
+  "reviewChecklist": null
+}
