@@ -5,3 +5,10 @@ __pycache__/
 .DS_Store
 node_modules/
 .env
+.env.*
+!.env.example
+.metabase_session.json
+data/
+*.sqlite
+*.sqlite3
+*.db
