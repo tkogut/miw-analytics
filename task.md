@@ -10,9 +10,10 @@ sync_mode: distributed-union
   - **Role**: Builder
   - **Status**: READY
   - **Scope**: Zapytania SQL do bazy `15` (`sale_order`, `res_currency_rate`), kwoty netto/miesięcznie dla Company ID 1.
-- [ ] **T-003**: Generator raportów analitycznych i integracja CLI / API
+- [ ] **T-003**: Generator raportów analitycznych i publikacja w Metabase (Cards & Dashboards API)
   - **Role**: Builder
   - **Status**: BACKLOG
+  - **Scope**: Metody w `MetabaseClient` i skrypty CLI do tworzenia pytań/kart (`POST /api/card`) oraz dashboardów (`POST /api/dashboard`, `POST /api/dashboard/:id/cards`) z siatką (grid layout) w Personal/Shared Collections. Strict Read-Only dla Odoo.
 
 ## 📦 Backlog
 <!-- Add new tasks below. Conflict-free union merge enabled. -->
