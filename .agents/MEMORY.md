@@ -40,3 +40,4 @@ last_sync: 2026-10-19
 - [2026-10-19 09:41 UTC] [Local] [Coordinator] Zarejestrowano architekturę tworzenia raportów (Cards) i Dashboardów bezpośrednio w Metabase.
 - [2026-10-19 09:56 UTC] [Local] [Builder/Coordinator] Zbadano strukturę crm_team=11 (Wagi Samochodowe), sale_order i account_move. Opublikowano raport Card 725 w Metabase.
 - [2026-10-19 11:08 UTC] [Local] [Builder/Coordinator] Zaimplementowano zestaw wizualizacji (karty 726-731) i opublikowano kompletny Dashboard 137 w Metabase.
+- [2026-10-19 11:51 UTC] [Local] [Coordinator] Wyczyszczono uszkodzone symlinki w .claude/skills, usunięto katalog ze śledzenia Gita i dodano do .gitignore (SSOT pozostaje w .agents/skills).
