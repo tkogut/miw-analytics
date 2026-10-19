@@ -28,9 +28,11 @@ last_sync: 2026-10-19
 - [SECURITY] Utworzono specyfikację architektury w `.agents/docs/metabase_architecture.md` zapobiegającą alertom e-mail o nowym urządzeniu ("New login from a new device").
 - [DATA] Potwierdzono identyfikatory: Company ID 1 (`MIW Group Tomasz Kogut Sp. k.`), waluta bazowa PLN (ID 17).
 - [CAPABILITY] Potwierdzono możliwość tworzenia wykresów, pytań (Cards) i pulpitów (Dashboards) w Metabase przez API bez naruszania bazy Odoo.
+- [AUTH] Wdrożono i zweryfikowano `src/metabase_client.py` z architekturą Zero Alert Flood (trwały token w `.metabase_session.json` + `metabase.DEVICE` + Chrome UA). Nawiązano stabilne połączenie z instancją bazy PostgreSQL Odoo `prod` (DB 15).
 
 ## 🔄 Machine Session Log
 <!-- Format: - [YYYY-MM-DD HH:MM UTC] [Node] [Role] Description -->
 - [INIT] [Local] [Coordinator] Swarm memory initialized with union-merge capability.
 - [2026-10-19 09:36 UTC] [Local] [Coordinator] Przeniesiono konfigurację środowiskową i zarejestrowano architekturę bezpiecznego klienta MetabaseClient.
+- [2026-10-19 09:44 UTC] [Local] [Builder/Coordinator] Zaimplementowano moduł MetabaseClient, przeprowadzono testy jednostkowe i live handshake z Metabase (DB 15 / Odoo prod).
 - [2026-10-19 09:41 UTC] [Local] [Coordinator] Zarejestrowano architekturę tworzenia raportów (Cards) i Dashboardów bezpośrednio w Metabase.
