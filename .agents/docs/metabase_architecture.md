@@ -83,3 +83,15 @@ Endpoint do uruchamiania kwerend SQL (Database ID = 15):
 - **Przeliczenia walut:**
   - `currency_id = 17` -> PLN
   - Inne waluty (np. EUR) przeliczane po kursie z `res_currency_rate` na dzień zamówienia lub z pól `amount_untaxed` po znormalizowanym kursie.
+
+---
+
+## 7. Programistyczne Tworzenie Raportów i Pulpitów w Metabase
+Możemy tworzyć raporty widoczne w interfejsie webowym Metabase (`https://reports.trilab.pl`):
+1. **Tworzenie Karty / Raportu (`POST /api/card`):**
+   - Parametry: `name`, `dataset_query` (typ `native`, `database: 15`, zapytanie SQL), `display` (np. `"bar"`, `"line"`, `"table"`, `"scalar"`), `collection_id` (kolekcja osobista użytkownika lub wspólna).
+   - Metadane zapytania zapisują się w bazie samej aplikacji Metabase (baza Odoo pozostaje nienaruszona).
+2. **Tworzenie Pulpitu / Tablicy (`POST /api/dashboard`):**
+   - Parametry: `name`, `description`, `collection_id`.
+   - Dodawanie kart do pulpitu: `POST /api/dashboard/:id/cards` z układem siatki (`row`, `col`, `size_x`, `size_y`).
+3. **Efekt:** Użytkownik i zespół mogą logować się przez przeglądarkę i przeglądać interaktywne, odświeżające się wykresy wygenerowane przez agenta.
