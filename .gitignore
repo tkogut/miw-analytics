@@ -12,3 +12,4 @@ data/
 *.sqlite
 *.sqlite3
 *.db
+.claude/skills/
