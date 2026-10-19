@@ -30,6 +30,7 @@ last_sync: 2026-10-19
 - [CAPABILITY] Potwierdzono możliwość tworzenia wykresów, pytań (Cards) i pulpitów (Dashboards) w Metabase przez API bez naruszania bazy Odoo.
 - [AUTH] Wdrożono i zweryfikowano `src/metabase_client.py` z architekturą Zero Alert Flood (trwały token w `.metabase_session.json` + `metabase.DEVICE` + Chrome UA). Nawiązano stabilne połączenie z instancją bazy PostgreSQL Odoo `prod` (DB 15).
 - [REPORT] Opublikowano pierwszy raport analityczny w Metabase: Card ID `725` ('Wagi Samochodowe — Miesięczne zestawienie handlowców (2026)') w Personal Collection Tomasza (ID `47`). URL: `https://reports.trilab.pl/question/725`.
+- [DASHBOARD] Utworzono interaktywny pulpit w Metabase: Dashboard ID `137` ('Pulpit Sprzedaży — Wagi Samochodowe (2026)') zawierający 7 kart (3x KPI, wykres słupkowy, kołowy, liniowy oraz pełną tabelę analityczną) w Personal Collection Tomasza (ID `47`). URL: `https://reports.trilab.pl/dashboard/137`.
 
 ## 🔄 Machine Session Log
 <!-- Format: - [YYYY-MM-DD HH:MM UTC] [Node] [Role] Description -->
@@ -38,3 +39,4 @@ last_sync: 2026-10-19
 - [2026-10-19 09:44 UTC] [Local] [Builder/Coordinator] Zaimplementowano moduł MetabaseClient, przeprowadzono testy jednostkowe i live handshake z Metabase (DB 15 / Odoo prod).
 - [2026-10-19 09:41 UTC] [Local] [Coordinator] Zarejestrowano architekturę tworzenia raportów (Cards) i Dashboardów bezpośrednio w Metabase.
 - [2026-10-19 09:56 UTC] [Local] [Builder/Coordinator] Zbadano strukturę crm_team=11 (Wagi Samochodowe), sale_order i account_move. Opublikowano raport Card 725 w Metabase.
+- [2026-10-19 11:08 UTC] [Local] [Builder/Coordinator] Zaimplementowano zestaw wizualizacji (karty 726-731) i opublikowano kompletny Dashboard 137 w Metabase.
